@@ -1,61 +1,164 @@
 #include <iostream>
+#include<iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
 #include "EnumFiles.h"
 using namespace std;
 
-void DumpText(string fileNmae)
+bool DumpText(string& strFileNmae)
 {
 	unsigned int lineCount = 1;
-	char fstring[0xFF] = { 0 };
-	vector<string> perLine;
 
-	ifstream tFile(fileNmae);
-	for (std::string str; getline(tFile, str); lineCount++)
+	ofstream transFile(strFileNmae + ".txt");
+	ifstream scriptFile(strFileNmae);
+	if (!transFile.is_open() || !scriptFile.is_open())
 	{
-		if (str.size() > 0)
+		return false;
+	}
+	for (std::string line; getline(scriptFile, line); lineCount++)
+	{
+		if (line.size() > 0)
 		{
-			unsigned char a = str[0];
-			if (a >= 0x7B)
+			if ((unsigned char)line[0] >= 0x7B)
 			{
-				sprintf_s(fstring, "Count:%08d \nRaw:", lineCount);
-				str.insert(0, fstring);
-				perLine.push_back(str);
-
+				transFile << "Count:" << setw(8) << setfill('0') << lineCount << endl;
+				transFile << "Raw:" << line << endl;
+				transFile << "Tra:" << endl << endl;
 			}
 		}
-
 	}
-	tFile.close();
+	scriptFile.close();
+	transFile.close();
 
-	ofstream oFile(fileNmae + ".txt");
-	for (auto& vs : perLine)
-	{
-		oFile << vs << endl;
-		oFile << "Tra:" << endl << endl;
-	}
-	oFile.close();
+	return true;
 }
 
-void InsetText()
+bool InsetText(string& strFileName)
 {
-	//To Be Continued
+	unsigned int position = 0;
+	vector<string> transFileLineList;
+	vector<string> scriptFileLineList;
+	vector<unsigned int> transTextPositionList;
+
+	//Get Trans Text
+	ifstream transFile(strFileName + ".txt");
+	if (!transFile.is_open())
+	{
+		return false;
+	}
+	for (std::string line; getline(transFile, line);)
+	{
+		if (line.find("Count:") != string::npos)
+		{
+			sscanf_s(line.c_str(), "Count:%d", &position);
+			getline(transFile, line);
+			getline(transFile, line);
+			line = line.substr(sizeof("Tra:") - 1);
+			if (!line.empty())
+			{
+				transTextPositionList.push_back(position);
+				transFileLineList.push_back(line);
+			}
+		}
+	}
+	transFile.close();
+
+	//Read Script PerLine
+	ifstream scriptFile(strFileName);
+	if (!scriptFile.is_open())
+	{
+		return false;
+	}
+
+	for (std::string line; getline(scriptFile, line);)
+	{
+		scriptFileLineList.push_back(line);
+	}
+	scriptFile.close();
+
+	//Out New Script File
+	ofstream newScriptFile(strFileName + ".new", ios::binary);
+	if (!newScriptFile.is_open())
+	{
+		return false;
+	}
+	//Replace Trans Text
+	for (size_t i = 0; i < transTextPositionList.size(); i++)
+	{
+		scriptFileLineList[transTextPositionList[i] - 1] = transFileLineList[i];
+	}
+	 //Write Back ALL Line
+	for (auto& line : scriptFileLineList)
+	{
+		newScriptFile << line << '\n';
+	}
+	newScriptFile.close();
+
+	return true;
 }
 
 int main()
 {
+	bool isDump = FALSE;
+	bool isInset = FALSE;
+	char flag = 0;
 	string basePathA = ".\\";
 	std::vector<std::string> filesNameA;
-	EnumFilesA enumFileA(basePathA);
-	filesNameA = enumFileA.GetFilesNameBasePath();
 
-	for (auto& vf : filesNameA)
+	cout << "Input [ d ] to dump Text" << endl;
+	cout << "Input [ i ] to insert Text" << endl;
+
+	while (true)
 	{
-		if (vf.find(".",2) == string::npos)
+		EnumFilesA enumFileA(basePathA);
+		filesNameA = enumFileA.GetFilesNameBasePath();
+
+		cout << "\nInput:";
+		cin >> flag;
+
+		switch (flag)
 		{
-			DumpText(vf);
+		case 'd':
+			for (auto& f : filesNameA)
+			{
+				if (f.find(".", 2) == string::npos)
+				{
+					isDump = DumpText(f);
+					if (isDump)
+					{
+						cout << "Dump:" << f << std::endl;
+					}
+					else
+					{
+						cout << "Failed:" << f << std::endl;
+					}
+				}
+			}
+			break;
+
+		case 'i':
+
+			for (auto& f : filesNameA)
+			{
+				if (f.find(".", 2) == string::npos)
+				{
+					isInset = InsetText(f);
+					if (isInset)
+					{
+						cout << "Inset:" << f << std::endl;
+					}
+					else
+					{
+						cout << "Failed:" << f << std::endl;
+					}
+				}
+			}
+			break;
+
+		default:
+			cout << "Illegal instructions" << endl;
+			break;
 		}
 	}
-
 }
