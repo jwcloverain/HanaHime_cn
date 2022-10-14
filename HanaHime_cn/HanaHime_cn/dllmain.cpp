@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <detours.h>
-#include "Tools.h"
+#include "ACV1Extract.h"
 
 DWORD g_dwExeImageBase = 0;
 DWORD g_dwInputChar = 0;
@@ -67,21 +67,40 @@ VOID WriteTable()
 VOID Patch()
 {
 	WriteTable();
-	BYTE patchCharSet[] = { 0x86 };
+
+	CHAR scriptPackName[] = "script.cn";
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x1C1BE8), scriptPackName, sizeof(scriptPackName));
+
+	BYTE patchCharSet[] = { 0x86 }; // 0x80 - > 0x86
 	WriteMemory((LPVOID)(g_dwExeImageBase + 0x76B6F), patchCharSet, sizeof(patchCharSet));
+	BYTE patchChar1[] = { 0xA1 }; //¡¾ 8179 -> A1BE
+	BYTE patchChar2[] = { 0xBE }; //¡¾ 8179 -> A1BE
+	BYTE patchChar3[] = { 0xBF }; // ¡¿817A -> A1BF
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x255E9), patchChar1, sizeof(patchChar1));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x632CB), patchChar1, sizeof(patchChar1));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x7609E), patchChar1, sizeof(patchChar1));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x63313), patchChar1, sizeof(patchChar1));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x25612), patchChar1, sizeof(patchChar1));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x760FC), patchChar1, sizeof(patchChar1));
+
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x632E0), patchChar2, sizeof(patchChar2));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x255EF), patchChar2, sizeof(patchChar2));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x760B3), patchChar2, sizeof(patchChar2));
+
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x63325), patchChar3, sizeof(patchChar3));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x25619), patchChar3, sizeof(patchChar3));
+	WriteMemory((LPVOID)(g_dwExeImageBase + 0x7610E), patchChar3, sizeof(patchChar3));
 }
 
 VOID StartHook()
 {
 	//SetConsole();
 	Patch();
+	//SetFileDump();
+	SetFileHook();
 
-	DetourRestoreAfterWith();
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)rawCreateFontA, newCreateFontA);
-	DetourAttach(&(PVOID&)rawCreateFontIndirectA, newCreateFontIndirectA);
-	DetourTransactionCommit();
+	DetourAttachFunc(&rawCreateFontA, newCreateFontA);
+	DetourAttachFunc(&rawCreateFontIndirectA, newCreateFontIndirectA);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule,
