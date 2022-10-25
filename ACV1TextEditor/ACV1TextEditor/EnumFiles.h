@@ -4,33 +4,36 @@
 #include <vector>
 #include <queue>
 
-//网上抄的，不要bb
 class EnumFilesA
 {
 public:
-	EnumFilesA(std::string& strPath);
-	VOID FindFiles(std::string);
-	std::vector<std::string>& GetFilesPath();
-	std::vector<std::string>& GetFilesName();
-	std::vector<std::string>& GetFilesNameBasePath();
+	EnumFilesA(std::string& strBasePath);
+
+	std::vector<std::string>& GetAllFilesName();
+	std::vector<std::string>& GetAllFilesNameRelaPath();
+	std::vector<std::string>& GetCurrentFilesName();
 private:
-	std::string rootPath;
-	std::vector<std::string> filesPath;
-	std::vector<std::string> filesName;
-	std::vector<std::string> filesNameBasePath;
+	BOOL FindFiles(std::string);
+
+	std::string m_strBasePath;
+	std::vector<std::string> m_vstrAllFileNameList;
+	std::vector<std::string> m_vstrAllFileNameRelaPathList;
+	std::vector<std::string> m_vstrCurrentFileNameList;
 };
 
 class EnumFilesW
 {
 public:
-	EnumFilesW(std::wstring& strPath);
-	VOID FindFiles(std::wstring);
-	std::vector<std::wstring>& GetFilesPath();
-	std::vector<std::wstring>& GetFilesName(); 
-	std::vector<std::wstring>& GetFilesNameBasePath();
+	EnumFilesW(std::wstring& strBasePath);
+
+	std::vector<std::wstring>& GetAllFilesName(); 
+	std::vector<std::wstring>& GetAllFilesNameRelaPath();
+	std::vector<std::wstring>& GetCurrentFilesName();
 private:
-	std::wstring rootPath;
-	std::vector<std::wstring> filesPath;
-	std::vector<std::wstring> filesName;
-	std::vector<std::wstring> filesNameBasePath;
+	BOOL FindFiles(std::wstring);
+
+	std::wstring m_strBasePath;
+	std::vector<std::wstring> m_vwstrAllFileNameList;
+	std::vector<std::wstring> m_vwstrAllFileNameRelaPathList;
+	std::vector<std::wstring> m_vwstrCurrentFileNameList;
 };

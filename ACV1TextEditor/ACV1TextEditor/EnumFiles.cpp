@@ -1,155 +1,176 @@
 #include "EnumFiles.h"
 
 //EnumFilesA
-EnumFilesA::EnumFilesA(std::string& strPath) :rootPath(strPath)
+EnumFilesA::EnumFilesA(std::string& strBasePath) :m_strBasePath(strBasePath)
 {
-	FindFiles(rootPath);
+	FindFiles(m_strBasePath);
 }
 
-VOID EnumFilesA::FindFiles(std::string strPath)
+BOOL EnumFilesA::FindFiles(std::string strBasePath)
 {
-	WIN32_FIND_DATAA fd;
-	std::queue<std::string> directory;
+	HANDLE hFind = 0;
+	WIN32_FIND_DATAA findData;
+	std::string findName;
+	std::string directory;
+	std::string directoryWildcard;
+	std::string nextFindDirectory;
+	std::queue<std::string> directoryQueue;
 
-	if (strPath[strPath.size() - 1] != '\\')
+
+	if (strBasePath[strBasePath.size() - 1] != '\\')
 	{
-		strPath += "\\";
+		strBasePath += "\\";
 	}
-	directory.push(strPath);
+	directoryQueue.push(strBasePath);
 
-	while (!directory.empty())
+	for (; !directoryQueue.empty();)
 	{
-		std::string everyPath = directory.front();
-		std::string tempPath = everyPath + "*";
+		directory = directoryQueue.front();
+		directoryWildcard = directory + "*";
 
-		HANDLE hFind = FindFirstFileA(tempPath.c_str(), &fd);
+		hFind = FindFirstFileA(directoryWildcard.c_str(), &findData);
 		if (hFind == INVALID_HANDLE_VALUE)
 		{
-			FindClose(hFind);
-			return;
+			return FALSE;
 		}
-		do
+
+		for (;;)
 		{
-			std::string isFile = fd.cFileName;
-			if ((fd.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE) != 0)
+			findName = findData.cFileName;
+			if (findData.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE)
 			{
-				filesPath.push_back(everyPath + isFile);
+				m_vstrAllFileNameRelaPathList.push_back(directory + findName);
 			}
-			else if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 && (isFile != "." && isFile != ".."))
+			else if ((findData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) && (findName != "." && findName != ".."))
 			{
-				std::string Rp = everyPath + fd.cFileName + "\\";
-				directory.push(Rp);
+				nextFindDirectory = directory + findData.cFileName + "\\";
+				directoryQueue.push(nextFindDirectory);
 			}
-		} while (FindNextFileA(hFind, &fd));
-		directory.pop();
+
+			if (!FindNextFileA(hFind, &findData))
+			{
+				break;
+			}
+		}
+		directoryQueue.pop();
 		FindClose(hFind);
 	}
+
+	return TRUE;
 }
 
-std::vector<std::string>& EnumFilesA::GetFilesPath()
+std::vector<std::string>& EnumFilesA::GetAllFilesNameRelaPath()
 {
-	return filesPath;
+	return m_vstrAllFileNameRelaPathList;
 }
 
-std::vector<std::string>& EnumFilesA::GetFilesName()
+std::vector<std::string>& EnumFilesA::GetAllFilesName()
 {
 	SIZE_T len = 0;
-	std::string name;
 
-	for (std::string p : filesPath)
+	for (std::string p : m_vstrAllFileNameRelaPathList)
 	{
 		len = p.find_last_of("\\") + 1;
-		name = p.substr(len, p.length() - len);
-		filesName.push_back(name);
+		m_vstrAllFileNameList.push_back(p.substr(len, p.length() - len));
 	}
-	return filesName;
+	return m_vstrAllFileNameList;
 }
 
-std::vector<std::string>& EnumFilesA::GetFilesNameBasePath()
+std::vector<std::string>& EnumFilesA::GetCurrentFilesName()
 {
-	for (std::string p : filesPath)
+	for (std::string p : m_vstrAllFileNameRelaPathList)
 	{
 		if (p.find("\\", 2) == std::string::npos)
 		{
-			filesNameBasePath.push_back(p);
+			m_vstrCurrentFileNameList.push_back(p.substr(0x2));
 		}
 	}
-	return filesNameBasePath;
+	return m_vstrCurrentFileNameList;
 }
 
 //EnumFilesW
-EnumFilesW::EnumFilesW(std::wstring& strPath) :rootPath(strPath)
+EnumFilesW::EnumFilesW(std::wstring& strBasePath) :m_strBasePath(strBasePath)
 {
-	FindFiles(rootPath);
+	FindFiles(m_strBasePath);
 }
 
-VOID EnumFilesW::FindFiles(std::wstring strPath)
+BOOL EnumFilesW::FindFiles(std::wstring strBasePath)
 {
-	WIN32_FIND_DATAW fd;
-	std::queue<std::wstring> directory;
+	HANDLE hFind = 0;
+	WIN32_FIND_DATAW findData;
+	std::wstring findName;
+	std::wstring directory;
+	std::wstring directoryWildcard;
+	std::wstring nextFindDirectory;
+	std::queue<std::wstring> directoryQueue;
 
-	if (strPath[strPath.size() - 1] != L'\\')
+	if (strBasePath[strBasePath.size() - 1] != L'\\')
 	{
-		strPath += L"\\";
+		strBasePath += L"\\";
 	}
-	directory.push(strPath);
+	directoryQueue.push(strBasePath);
 
-	while (!directory.empty())
+	for (;!directoryQueue.empty();)
 	{
-		std::wstring everyPath = directory.front();
-		std::wstring tempPath = everyPath + L"*";
+		directory = directoryQueue.front();
+		directoryWildcard = directory + L"*";
 
-		HANDLE hFind = FindFirstFileW(tempPath.c_str(), &fd);
+		hFind = FindFirstFileW(directoryWildcard.c_str(), &findData);
 		if (hFind == INVALID_HANDLE_VALUE)
 		{
-			FindClose(hFind);
-			return;
+			return FALSE;
 		}
-		do
+
+		for (;;)
 		{
-			std::wstring isFile = fd.cFileName;
-			if ((fd.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE) != 0)
+			findName = findData.cFileName;
+			if (findData.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE)
 			{
-				filesPath.push_back(everyPath + isFile);
+				m_vwstrAllFileNameRelaPathList.push_back(directory + findName);
 			}
-			else if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 && (isFile != L"." && isFile != L".."))
+			else if ((findData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) && (findName != L"." && findName != L".."))
 			{
-				std::wstring Rp = everyPath + fd.cFileName + L"\\";
-				directory.push(Rp);
+				nextFindDirectory = directory + findData.cFileName + L"\\";
+				directoryQueue.push(nextFindDirectory);
 			}
-		} while (FindNextFileW(hFind, &fd));
-		directory.pop();
+
+			if (!FindNextFileW(hFind, &findData))
+			{
+				break;
+			}
+		}
+		directoryQueue.pop();
 		FindClose(hFind);
 	}
+
+	return TRUE;
 }
 
-std::vector<std::wstring>& EnumFilesW::GetFilesPath()
+std::vector<std::wstring>& EnumFilesW::GetAllFilesNameRelaPath()
 {
-	return filesPath;
+	return m_vwstrAllFileNameRelaPathList;
 }
 
-std::vector<std::wstring>& EnumFilesW::GetFilesName()
+std::vector<std::wstring>& EnumFilesW::GetAllFilesName()
 {
-	SIZE_T len = 0;
-	std::wstring name;
+	SIZE_T offset = 0;
 
-	for (std::wstring p : filesPath)
+	for (std::wstring p : m_vwstrAllFileNameRelaPathList)
 	{
-		len = p.find_last_of(L"\\") + 1;
-		name = p.substr(len, p.length() - len);
-		filesName.push_back(name);
+		offset = p.find_last_of(L"\\") + 1;
+		m_vwstrAllFileNameList.push_back(p.substr(offset, p.length() - offset));
 	}
-	return filesName;
+	return m_vwstrAllFileNameList;
 }
 
-std::vector<std::wstring>& EnumFilesW::GetFilesNameBasePath()
+std::vector<std::wstring>& EnumFilesW::GetCurrentFilesName()
 {
-	for (std::wstring p : filesPath)
+	for (std::wstring p : m_vwstrAllFileNameRelaPathList)
 	{
 		if (p.find(L"\\", 2) == std::wstring::npos)
 		{
-			filesNameBasePath.push_back(p);
+			m_vwstrCurrentFileNameList.push_back(p.substr(0x2));
 		}
 	}
-	return filesNameBasePath;
+	return m_vwstrCurrentFileNameList;
 }

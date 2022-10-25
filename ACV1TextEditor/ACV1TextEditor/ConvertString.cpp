@@ -1,32 +1,29 @@
 #include "ConvertString.h"
 
-DWORD g_dwExCodePage = 932;
-DWORD g_dwInCodePage = CP_ACP;
-
-std::string WstrToStr(std::wstring& wStr)
+std::string WStrToStr(std::wstring& wstrString, UINT uCodePage)
 {
+	int lenStr = 0;
 	std::string result;
 
-	int len = WideCharToMultiByte(g_dwInCodePage, NULL, wStr.c_str(), wStr.size(), NULL, NULL, NULL, NULL);
-	char* buffer = new char[len + 1];
-
-	WideCharToMultiByte(g_dwInCodePage, NULL, wStr.c_str(), wStr.size(), buffer, len, NULL, NULL);
-	buffer[len] = '\0';
+	lenStr = WideCharToMultiByte(uCodePage, NULL, wstrString.c_str(), wstrString.size(), NULL, NULL, NULL, NULL);
+	char* buffer = new char[lenStr + 1];
+	WideCharToMultiByte(uCodePage, NULL, wstrString.c_str(), wstrString.size(), buffer, lenStr, NULL, NULL);
+	buffer[lenStr] = '\0';
 
 	result.append(buffer);
 	delete[] buffer;
 	return result;
 }
 
-std::wstring StrToWstr(std::string& sStr)
+std::wstring StrToWStr(std::string& strString, UINT uCodePage)
 {
+	int lenWStr = 0;
 	std::wstring result;
 
-	int len = MultiByteToWideChar(g_dwExCodePage, NULL, sStr.c_str(), sStr.size(), NULL, NULL);
-	wchar_t* buffer = new wchar_t[len + 1];
-
-	MultiByteToWideChar(g_dwExCodePage, NULL, sStr.c_str(), sStr.size(), buffer, len);
-	buffer[len] = '\0';
+	lenWStr = MultiByteToWideChar(uCodePage, NULL, strString.c_str(), strString.size(), NULL, NULL);
+	wchar_t* buffer = new wchar_t[lenWStr + 1];
+	MultiByteToWideChar(uCodePage, NULL, strString.c_str(), strString.size(), buffer, lenWStr);
+	buffer[lenWStr] = '\0';
 
 	result.append(buffer);
 	delete[] buffer;

@@ -76,6 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,10 +130,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ACV1TextEditor.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ConvertString.cpp" />
     <ClCompile Include="EnumFiles.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ACV1TextEditor.h" />
     <ClInclude Include="ConvertString.h" />
     <ClInclude Include="EnumFiles.h" />
   </ItemGroup>

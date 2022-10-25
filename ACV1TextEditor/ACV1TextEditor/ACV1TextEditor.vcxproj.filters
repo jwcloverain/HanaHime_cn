@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ACV1TextEditor.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConvertString.cpp">
@@ -24,12 +24,18 @@
     <ClCompile Include="EnumFiles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ACV1TextEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConvertString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnumFiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ACV1TextEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
