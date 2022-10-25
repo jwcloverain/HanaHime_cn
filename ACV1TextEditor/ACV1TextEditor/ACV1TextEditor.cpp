@@ -12,21 +12,23 @@ bool DumpText(wstring& strFileNmae, unsigned int uCodePage, bool isDoubleLine)
 	{
 		for (std::string mLine; getline(scriptFile, mLine); lineCount++)
 		{
-			if (mLine.size() > 0)
+			if (mLine.size() <= 0)
 			{
-				if ((unsigned char)mLine[0] >= 0x7B)
+				continue;
+			}
+
+			if ((unsigned char)mLine[0] >= 0x7B)
+			{
+				wstring wLine = StrToWStr(mLine, uCodePage);
+				transFile << L"Count:" << setw(0x8) << setfill(L'0') << lineCount << endl;
+				transFile << L"Raw:" << wLine << endl;
+				if (isDoubleLine)
 				{
-					wstring wLine = StrToWStr(mLine, uCodePage);
-					transFile << L"Count:" << setw(0x8) << setfill(L'0') << lineCount << endl;
-					transFile << L"Raw:" << wLine << endl;
-					if (isDoubleLine)
-					{
-						transFile << L"Tra:" << wLine << endl << endl;
-					}
-					else
-					{
-						transFile << L"Tra:" << endl << endl;
-					}
+					transFile << L"Tra:" << wLine << endl << endl;
+				}
+				else
+				{
+					transFile << L"Tra:" << endl << endl;
 				}
 			}
 		}
